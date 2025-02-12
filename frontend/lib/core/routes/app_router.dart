@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import '../../features/home/screens/home_screen.dart';
 import '../../features/news/screens/news_detail_screen.dart';
 import '../../features/news/models/news_article.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import '../../features/charts/screens/charts_screen.dart';
 import '../../features/quotes/screens/quotes_screen.dart';
 import '../../features/indicators/screens/indicators_screen.dart';
 import '../../features/demo/screens/demo_account_screen.dart';
-import '../navigation/bottom_nav.dart';
 import '../providers/theme_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();

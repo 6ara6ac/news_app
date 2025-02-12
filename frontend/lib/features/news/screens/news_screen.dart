@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/news_provider.dart';
 import '../widgets/news_card.dart';
-import '../widgets/news_filters.dart';
 import '../widgets/news_search.dart';
 import '../widgets/news_categories.dart';
 
