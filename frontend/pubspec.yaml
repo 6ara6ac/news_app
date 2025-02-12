@@ -1,0 +1,60 @@
+name: news4trading
+description: "News4Trading - Financial News App"
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  
+  # State management
+  flutter_riverpod: ^2.4.9
+  
+  # Network
+  dio: ^5.4.0
+  
+  # UI
+  cached_network_image: ^3.3.0
+  go_router: ^14.7.2
+  
+  # Features
+  url_launcher: ^6.2.4
+  share_plus: ^7.2.1
+  webview_flutter: ^4.4.2
+  
+  # Utils
+  intl: ^0.19.0
+  
+  # Added from the code block
+  riverpod: ^2.4.9
+  shimmer: ^3.0.0
+  google_fonts: ^6.1.0
+  flutter_tts: ^3.8.5
+  web_socket_channel: ^3.0.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+  flutter_svg: ^2.0.9
+  logger: ^2.0.2+1
+  path_provider: ^2.0.15
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.7
+  hive_generator: ^2.0.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/translations/
+    - assets/images/placeholder.png 
