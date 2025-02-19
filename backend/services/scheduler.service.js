@@ -1,11 +1,17 @@
 const newsService = require('./news.service');
 const dbService = require('./db.service');
+const indicatorsService = require('./indicators.service');
 
 class SchedulerService {
   constructor() {
     this.interval = 10 * 60 * 1000; // 10 минут
     this.categories = ['crypto', 'forex', 'commodities', 'general'];
-    this.countries = ['ru', 'us', 'gb'];
+    this.countries = ['Соединенные Штаты', 'Китай', 'Зона евро', 'Германия'];
+    
+    // Добавляем обновление индикаторов раз в неделю
+    setInterval(() => {
+      this.updateIndicators();
+    }, 7 * 24 * 60 * 60 * 1000); // 7 дней
   }
 
   start() {
@@ -70,6 +76,14 @@ class SchedulerService {
       console.log('News update completed successfully');
     } catch (error) {
       console.error('News update failed:', error);
+    }
+  }
+
+  async updateIndicators() {
+    try {
+      await indicatorsService.updateIndicators();
+    } catch (error) {
+      console.error('Failed to update indicators:', error);
     }
   }
 }

@@ -12,6 +12,8 @@ const schedulerService = require('./services/scheduler.service');
 const scraperService = require('./services/scraper.service');
 const path = require('path');
 const fs = require('fs');
+const indicatorsRoutes = require('./src/routes/indicators.routes');
+const indicatorsService = require('./services/indicators.service');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +22,7 @@ const PORT = process.env.PORT || 3000;
 connectDB().then(() => {
   console.log('MongoDB connected successfully');
   schedulerService.start();
+  indicatorsService.updateIndicators();
 }).catch((err) => {
   console.error('MongoDB connection error:', err);
   process.exit(1);
@@ -30,6 +33,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
+app.use('/api/indicators', indicatorsRoutes);
 
 // Роуты для новостей
 app.get('/api/news', async (req, res) => {

@@ -7,83 +7,101 @@ class IndicatorsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final indicators = ref.watch(indicatorsProvider);
+    final indicatorsAsync = ref.watch(indicatorsProvider);
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Table(
-          border: TableBorder.all(),
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(1.5),
-            2: FlexColumnWidth(1.5),
-            3: FlexColumnWidth(1.5),
-          },
-          children: [
-            const TableRow(
-              decoration: BoxDecoration(
-                color: Colors.grey,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Топ 20 экономик мира'),
+      ),
+      body: indicatorsAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (err, stack) => Center(
+          child: Text('Ошибка загрузки: $err'),
+        ),
+        data: (indicators) {
+          if (indicators.isEmpty) {
+            return const Center(
+              child: Text('Нет данных'),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Table(
+              border: TableBorder.all(
+                color: Colors.grey.shade300,
+                width: 1,
               ),
+              columnWidths: const {
+                0: FlexColumnWidth(2.5),
+                1: FlexColumnWidth(1.5),
+                2: FlexColumnWidth(1.5),
+                3: FlexColumnWidth(1.5),
+              },
               children: [
-                TableCell(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Страна'),
+                TableRow(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
                   ),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Text(
+                        'Страна',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Text(
+                        'Ставка %',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Text(
+                        'Инфляция %',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Text(
+                        'Безработица %',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
-                TableCell(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Ставка %'),
-                  ),
-                ),
-                TableCell(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Инфляция %'),
-                  ),
-                ),
-                TableCell(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Безработица %'),
-                  ),
-                ),
-              ],
-            ),
-            ...indicators
-                .map((indicator) => TableRow(
+                ...indicators.map((indicator) => TableRow(
                       children: [
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(indicator.country),
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(indicator.country),
                         ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(indicator.interestRate.toString()),
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child:
+                              Text(indicator.interestRate.toStringAsFixed(1)),
                         ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(indicator.inflation.toString()),
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(indicator.inflation.toStringAsFixed(1)),
                         ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(indicator.unemployment.toString()),
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child:
+                              Text(indicator.unemployment.toStringAsFixed(1)),
                         ),
                       ],
-                    ))
-                .toList(),
-          ],
-        ),
+                    )),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
