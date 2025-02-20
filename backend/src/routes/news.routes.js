@@ -4,23 +4,33 @@ const dbService = require('../../services/db.service');
 
 router.get('/', async (req, res) => {
   try {
-    const { category, page = 1, pageSize = 10, search } = req.query;
+    const { category, page = 1, pageSize = 20, search, searchFields, exact } = req.query;
     console.log('News request received:', { category, page, pageSize, search });
     
-    let result;
-    if (search) {
-      result = await dbService.searchArticles(search, {
-        category,
-        page: parseInt(page),
-        pageSize: parseInt(pageSize)
-      });
-    } else {
-      result = await dbService.getArticles({
-        category,
-        page: parseInt(page),
-        pageSize: parseInt(pageSize)
-      });
+    const query = {};
+    
+    if (category && category !== 'all') {
+      query.category = category.toLowerCase();
     }
+    
+    if (search) {
+      if (exact) {
+        // Для точного поиска используем $regex с учетом регистра
+        const searchRegex = new RegExp(search, 'i');
+        query.$or = searchFields.map(field => ({
+          [field]: searchRegex
+        }));
+      } else {
+        // Для обычного поиска используем text search
+        query.$text = { $search: search };
+      }
+    }
+    
+    const result = await dbService.getArticles({
+      query,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize)
+    });
 
     console.log('Sending response:', {
       articlesCount: result.articles.length,
@@ -28,11 +38,7 @@ router.get('/', async (req, res) => {
       hasMore: result.hasMore
     });
 
-    res.json({
-      articles: result.articles,
-      total: result.total,
-      hasMore: result.hasMore
-    });
+    res.json(result);
   } catch (error) {
     console.error('News route error:', error);
     res.status(500).json({ 

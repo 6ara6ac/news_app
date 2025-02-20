@@ -10,45 +10,98 @@ class NewsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final newsState = ref.watch(newsProvider);
+    final newsAsync = ref.watch(newsProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
 
-    return Column(
-      children: [
-        const NewsSearch(),
-        const SizedBox(height: 8),
-        const NewsCategories(),
-        Expanded(
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: newsState.when(
-              data: (news) {
-                if (news.isEmpty) {
-                  return const Center(
-                    child: Text('Нет новостей'),
-                  );
-                }
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  physics: const ClampingScrollPhysics(),
-                  itemCount: news.length,
-                  itemBuilder: (context, index) {
-                    return NewsCard(
-                      article: news[index],
-                    );
+    return Scaffold(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                const Expanded(child: NewsSearch()),
+                IconButton(
+                  icon: Icon(ref.watch(filterVisibilityProvider)
+                      ? Icons.filter_list_off
+                      : Icons.filter_list),
+                  onPressed: () {
+                    ref.read(filterVisibilityProvider.notifier).state =
+                        !ref.watch(filterVisibilityProvider);
                   },
-                );
-              },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          const NewsCategories(),
+          Expanded(
+            child: newsAsync.when(
               loading: () => const Center(
                 child: CircularProgressIndicator(),
               ),
-              error: (error, stack) => Center(
-                child: Text('Ошибка: $error'),
+              error: (err, stack) => Center(
+                child: Text('Ошибка загрузки: $err'),
               ),
+              data: (articles) {
+                if (articles.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.search_off, size: 64),
+                        const SizedBox(height: 16),
+                        Text(
+                          searchQuery.isNotEmpty
+                              ? 'Ничего не найдено по запросу "$searchQuery"'
+                              : selectedCategory.isNotEmpty
+                                  ? 'Нет новостей в категории "${selectedCategory}"'
+                                  : 'Нет доступных новостей',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () {
+                            ref.read(selectedCategoryProvider.notifier).state =
+                                '';
+                            ref.read(searchQueryProvider.notifier).state = '';
+                            ref.read(newsProvider.notifier).resetFilters();
+                          },
+                          child: const Text('Показать все новости'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    if (scrollInfo is ScrollEndNotification &&
+                        scrollInfo.metrics.pixels >=
+                            scrollInfo.metrics.maxScrollExtent * 0.8) {
+                      ref.read(newsProvider.notifier).loadNews();
+                    }
+                    return true;
+                  },
+                  child: RefreshIndicator(
+                    onRefresh: () =>
+                        ref.read(newsProvider.notifier).loadNews(refresh: true),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const ClampingScrollPhysics(),
+                      itemCount: articles.length,
+                      itemBuilder: (context, index) {
+                        return NewsCard(article: articles[index]);
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

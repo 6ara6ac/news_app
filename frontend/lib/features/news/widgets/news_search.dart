@@ -24,27 +24,20 @@ class _NewsSearchState extends ConsumerState<NewsSearch> {
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      ref.read(newsProvider.notifier).searchNews(query);
+      ref.read(newsProvider.notifier).setSearchQuery(query);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: TextField(
-        controller: _searchController,
-        onChanged: _onSearchChanged,
-        decoration: InputDecoration(
-          hintText: 'Search news...',
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+    return TextField(
+      controller: _searchController,
+      onChanged: _onSearchChanged,
+      decoration: InputDecoration(
+        hintText: 'Поиск новостей...',
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
     );

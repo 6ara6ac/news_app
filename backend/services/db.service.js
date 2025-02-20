@@ -47,42 +47,36 @@ class DBService {
     }
   }
 
-  async getArticles({ category, page = 1, pageSize = 10 }) {
+  async getArticles({ query = {}, page = 1, pageSize = 20 }) {
     try {
-      console.log('Getting articles with params:', { category, page, pageSize });
-      
-      const query = {};
-      if (category) {
-        query.category = category;
-      }
+      console.log('Getting articles with params:', { query, page, pageSize });
 
       const total = await Article.countDocuments(query);
       console.log('Total articles found:', total);
 
+      // Добавляем distinct по _id для уникальности
       const articles = await Article.find(query)
         .sort({ publishedAt: -1 })
         .skip((page - 1) * pageSize)
         .limit(pageSize)
-        .lean(); // Используем lean() для получения простых объектов
+        .distinct('_id')
+        .lean();
       
-      console.log('Retrieved articles count:', articles.length);
+      // Получаем полные документы по уникальным id
+      const uniqueArticles = await Article.find({
+        _id: { $in: articles }
+      }).sort({ publishedAt: -1 }).lean();
+        
+      console.log('Retrieved unique articles count:', uniqueArticles.length);
 
-      const result = {
-        articles: articles.map(article => ({
+      return {
+        articles: uniqueArticles.map(article => ({
           ...article,
-          id: article._id // Добавляем id для совместимости с фронтендом
+          id: article._id
         })),
         total,
         hasMore: total > page * pageSize
       };
-
-      console.log('Sending response:', {
-        articlesCount: result.articles.length,
-        total: result.total,
-        hasMore: result.hasMore
-      });
-
-      return result;
     } catch (error) {
       console.error('Error getting articles:', error);
       return { articles: [], total: 0, hasMore: false };

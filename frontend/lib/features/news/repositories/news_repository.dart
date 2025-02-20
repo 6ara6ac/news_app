@@ -19,8 +19,8 @@ class NewsRepository {
         '/news',
         queryParameters: {
           'page': page,
-          'pageSize': 10,
-          if (category != null) 'category': category,
+          'pageSize': 20,
+          'category': category?.toLowerCase(),
         },
       );
 
@@ -41,8 +41,14 @@ class NewsRepository {
   Future<List<NewsArticle>> searchNews(String query) async {
     try {
       final response = await _dio.get(
-        '/news/search',
-        queryParameters: {'q': query},
+        '/news',
+        queryParameters: {
+          'search': query.trim(),
+          'searchFields': ['title', 'shortSummary'],
+          'page': 1,
+          'pageSize': 20,
+          'exact': true,
+        },
       );
 
       if (response.statusCode == 200) {
@@ -51,7 +57,8 @@ class NewsRepository {
       }
       return [];
     } catch (e) {
-      throw Exception('Failed to search news: $e');
+      print('Error searching news: $e');
+      return [];
     }
   }
 }

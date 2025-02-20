@@ -4,8 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/news_article.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/widgets/shimmer_loading.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NewsDetailScreen extends StatelessWidget {
+class NewsDetailScreen extends ConsumerWidget {
   final NewsArticle article;
 
   const NewsDetailScreen({super.key, required this.article});
@@ -17,7 +18,7 @@ class NewsDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Navigator(
       onGenerateRoute: (_) => MaterialPageRoute(
         builder: (_) => Scaffold(
@@ -97,12 +98,20 @@ class NewsDetailScreen extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _launchUrl(article.link),
-                        child: const Text('Читать оригинал'),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(40),
                       ),
+                      child: const Text('Назад к новостям'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () => _launchUrl(article.link),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(40),
+                      ),
+                      child: const Text('Читать оригинал'),
                     ),
                   ]),
                 ),

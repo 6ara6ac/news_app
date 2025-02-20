@@ -11,12 +11,14 @@ final newsProvider =
 
 final selectedCategoryProvider = StateProvider<String>((ref) => '');
 final searchQueryProvider = StateProvider<String>((ref) => '');
+final filterVisibilityProvider = StateProvider<bool>((ref) => true);
 
 class NewsNotifier extends StateNotifier<AsyncValue<List<NewsArticle>>> {
   final NewsRepository _repository;
   int _currentPage = 1;
   bool _hasMore = true;
   String? _currentCategory;
+  String? _searchQuery;
 
   NewsNotifier(this._repository) : super(const AsyncValue.loading()) {
     loadNews();
@@ -32,10 +34,18 @@ class NewsNotifier extends StateNotifier<AsyncValue<List<NewsArticle>>> {
     if (!_hasMore) return;
 
     try {
-      final news = await _repository.getNews(
-        page: _currentPage,
-        category: _currentCategory,
-      );
+      final news = _searchQuery?.isNotEmpty == true
+          ? await _repository.searchNews(_searchQuery!)
+          : await _repository.getNews(
+              page: _currentPage,
+              category: _currentCategory,
+            );
+
+      if (news.isEmpty && _currentPage == 1) {
+        state = const AsyncValue.data([]);
+        _hasMore = false;
+        return;
+      }
 
       if (news.isEmpty) {
         _hasMore = false;
@@ -46,11 +56,44 @@ class NewsNotifier extends StateNotifier<AsyncValue<List<NewsArticle>>> {
       if (refresh || !state.hasValue) {
         state = AsyncValue.data(news);
       } else {
-        state = AsyncValue.data([...state.value!, ...news]);
+        final existingIds = state.value!.map((a) => a.id).toSet();
+        final uniqueNews =
+            news.where((a) => !existingIds.contains(a.id)).toList();
+
+        if (uniqueNews.isEmpty) {
+          _hasMore = false;
+          return;
+        }
+
+        state = AsyncValue.data([...state.value!, ...uniqueNews]);
       }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  void setCategory(String category) {
+    _currentCategory = category.isEmpty ? null : category;
+    _searchQuery = null;
+    _currentPage = 1;
+    _hasMore = true;
+    loadNews(refresh: true);
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query.isEmpty ? null : query;
+    _currentCategory = null;
+    _currentPage = 1;
+    _hasMore = true;
+    loadNews(refresh: true);
+  }
+
+  void resetFilters() {
+    _currentCategory = null;
+    _searchQuery = null;
+    _currentPage = 1;
+    _hasMore = true;
+    loadNews(refresh: true);
   }
 
   Future<void> searchNews(String query) async {

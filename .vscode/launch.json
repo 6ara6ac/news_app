@@ -9,7 +9,10 @@
             "cwd": "frontend",
             "request": "launch",
             "type": "dart",
-            "console": "externalTerminal"
+            "console": "externalTerminal",
+            "args": [
+                "--release"
+            ]
         },
         {
             "name": "frontend (profile mode)",

@@ -38,7 +38,6 @@ class AIService {
       });
 
       const summary = response.choices[0].message.content;
-      console.log(`Generated ${isShort ? 'short' : 'full'} summary:`, summary);
       return summary;
     } catch (error) {
       console.error('Error summarizing text:', error);

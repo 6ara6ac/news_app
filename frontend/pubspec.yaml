@@ -55,6 +55,6 @@ flutter:
   
   assets:
     - assets/images/
-    - assets/icons/
-    - assets/translations/
+    # - assets/icons/
+    # - assets/translations/
     - assets/images/placeholder.png 
